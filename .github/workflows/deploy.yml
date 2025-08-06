@@ -1,0 +1,44 @@
+name: Deploy Admin Panel
+
+on:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'admin/**'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'admin/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: admin/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd admin
+        npm ci
+        
+    - name: Build project
+      run: |
+        cd admin
+        npm run build
+        
+    - name: Deploy to Railway
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      run: |
+        cd admin
+        npx @railway/cli deploy
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
