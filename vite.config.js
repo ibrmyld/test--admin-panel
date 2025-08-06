@@ -23,17 +23,20 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
     minify: 'esbuild',
-    target: 'esnext'
+    target: 'esnext',
+    copyPublicDir: true
   },
   server: {
-    port: 3000,
+    port: 5173,
     host: true,
-    strictPort: true
+    strictPort: false,
+    open: true
   },
   preview: {
     port: process.env.PORT || 3000,
     host: '0.0.0.0',
-    strictPort: true
+    strictPort: true,
+    cors: true
   },
   esbuild: {
     target: 'esnext',

@@ -2,11 +2,10 @@
 cmd = "npm ci && npm run build"
 
 [start]
-cmd = "npm start"
+cmd = "npm run preview"
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
 
 [staticAssets]
 "dist" = "/"
