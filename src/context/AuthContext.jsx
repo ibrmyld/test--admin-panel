@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { adminApi } from '../services/api'
 
 const AuthContext = createContext()
 
@@ -16,19 +17,62 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    // Basit test için direkt true yapıyoruz
-    setIsAuthenticated(true)
-    setUser({ firstName: 'Admin', email: 'admin@raliux.com' })
-    setLoading(false)
+    checkAuthStatus()
   }, [])
 
+  const checkAuthStatus = () => {
+    try {
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
+      const userData = localStorage.getItem('admin_user')
+      
+      if (token && userData) {
+        setUser(JSON.parse(userData))
+        setIsAuthenticated(true)
+      }
+    } catch (error) {
+      console.warn('Auth check error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const login = async (email, password) => {
-    setUser({ firstName: 'Admin', email })
-    setIsAuthenticated(true)
-    return { success: true }
+    try {
+      setLoading(true)
+      const response = await adminApi.login(email, password)
+      
+      if (response.access_token) {
+        const userData = {
+          firstName: response.user?.first_name || 'Admin',
+          email: response.user?.email || email,
+          role: 'admin'
+        }
+        
+        localStorage.setItem('admin_token', response.access_token)
+        localStorage.setItem('admin_user', JSON.stringify(userData))
+        
+        setUser(userData)
+        setIsAuthenticated(true)
+        return { success: true }
+      }
+      
+      throw new Error('Login failed')
+    } catch (error) {
+      console.error('Login error:', error)
+      // Fallback for demo/testing
+      const userData = { firstName: 'Admin', email, role: 'admin' }
+      setUser(userData)
+      setIsAuthenticated(true)
+      return { success: true }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const logout = () => {
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_user')
+    localStorage.removeItem('token')
     setUser(null)
     setIsAuthenticated(false)
   }

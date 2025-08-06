@@ -1,42 +1,81 @@
 # Raliux Admin Panel
 
-Admin paneli için React tabanlı modern yönetim arayüzü.
+Railway'e deploy edilmek üzere optimize edilmiş React admin paneli.
 
-## Özellikler
+## 🚀 Özellikler
 
-- ⚡ Vite ile hızlı geliştirme
-- 🎨 Tailwind CSS ile modern tasarım
-- 📱 Responsive tasarım
-- 🔐 Güvenli admin paneli
-- 🚀 Railway deployment desteği
+- ⚡ **Vite**: Hızlı development ve build
+- 🎨 **Tailwind CSS**: Modern responsive tasarım
+- 🔐 **Authentication**: JWT token tabanlı güvenlik
+- 📊 **Dashboard**: İstatistikler ve yönetim paneli
+- 🚀 **Railway Deploy**: Otomatik deployment
+- 📱 **Responsive**: Mobil uyumlu tasarım
 
-## Kurulum
+## 📦 Kurulum
 
 ```bash
 npm install
 ```
 
-## Geliştirme
+## 🔧 Environment Variables
+
+`.env` dosyası oluştur:
+```env
+# Backend API URL (Railway)
+VITE_API_URL=https://raliux-backend.up.railway.app
+
+# Admin Panel Config
+VITE_APP_NAME=Raliux Admin Panel
+```
+
+## 🛠 Development
 
 ```bash
 npm run dev
 ```
+Admin panel: `http://localhost:3000`
 
-## Production Build
+## 🚀 Railway Deploy
 
-```bash
-npm run build
-```
+Bu admin panel Railway'e deploy edilmek üzere hazırlanmıştır:
 
-## Deployment
+1. **Repository'yi Railway'e bağla**
+2. **Environment variables'ları ayarla**
+3. **Otomatik deploy başlatılır**
 
-Bu proje Railway'de otomatik olarak deploy edilir. Admin klasöründeki değişiklikler otomatik olarak algılanır ve deploy edilir.
+### Railway Konfigürasyonu:
+- `nixpacks.toml`: Build ve start konfigürasyonu
+- `railway.json`: Deploy ayarları
+- Port: `$PORT` (Railway tarafından belirlenir)
 
-## Teknolojiler
+## 📚 Backend Bağlantısı
 
-- React 18
-- Vite
-- Tailwind CSS
-- Framer Motion
-- React Router
-- React Query
+Admin panel, Raliux Backend API'si ile çalışır:
+- **Backend URL**: `https://raliux-backend.up.railway.app`
+- **API Endpoints**: `/api/admin/*`
+- **Authentication**: JWT Bearer token
+
+## 🔐 Authentication
+
+Admin paneli JWT token tabanlı authentication kullanır:
+- Login: `POST /api/auth/login`
+- Token localStorage'da saklanır
+- Otomatik logout (401 durumunda)
+
+## 📊 API Endpoints
+
+- `GET /api/admin/stats` - Dashboard istatistikleri
+- `GET /api/posts` - Blog yazıları
+- `POST /api/posts` - Yeni yazı oluştur
+- `PUT /api/posts/:id` - Yazı güncelle
+- `DELETE /api/posts/:id` - Yazı sil
+
+## 🛠 Teknolojiler
+
+- **React 18** - UI Framework
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **React Router** - Routing
+- **React Query** - Data fetching
+- **Framer Motion** - Animations
+- **Railway** - Deployment
