@@ -2,7 +2,7 @@
 cmd = "npm ci && npm run build"
 
 [start]
-cmd = "npm run preview"
+cmd = "npm run start"
 
 [variables]
 NODE_ENV = "production"
