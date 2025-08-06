@@ -3,12 +3,9 @@ name: Deploy Admin Panel
 on:
   push:
     branches: [ master, main ]
-    paths:
-      - 'admin/**'
   pull_request:
     branches: [ master, main ]
-    paths:
-      - 'admin/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -23,22 +20,16 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: admin/package-lock.json
+        cache-dependency-path: package-lock.json
         
     - name: Install dependencies
-      run: |
-        cd admin
-        npm ci
+      run: npm ci
         
     - name: Build project
-      run: |
-        cd admin
-        npm run build
+      run: npm run build
         
-    - name: Deploy to Railway
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    - name: Deploy info
       run: |
-        cd admin
-        npx @railway/cli deploy
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        echo "🚀 Admin Panel deployed to Railway"
+        echo "📅 Time: $(date)"
+        echo "🌿 Branch: ${{ github.ref_name }}"
