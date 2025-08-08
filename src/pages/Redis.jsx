@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Database, Activity, Server, Trash2, Eye, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../services/api'
+import { adminApi } from '../services/api'
 
 const Redis = () => {
   const [selectedPrefix, setSelectedPrefix] = useState('')
@@ -13,7 +13,7 @@ const Redis = () => {
   // Redis Stats Query
   const { data: redisStats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ['redisStats'],
-    queryFn: () => api.get('/admin/redis/stats'),
+    queryFn: () => adminApi.getRedisStats(),
     refetchInterval: 5000, // Auto refresh every 5 seconds
     onError: (error) => {
       toast.error('Redis stats yüklenemedi: ' + error.message)
@@ -23,13 +23,7 @@ const Redis = () => {
   // Redis Keys Query
   const { data: redisKeys, isLoading: keysLoading, refetch: refetchKeys } = useQuery({
     queryKey: ['redisKeys', selectedPrefix, keyPattern],
-    queryFn: () => api.get('/admin/redis/keys', { 
-      params: { 
-        prefix: selectedPrefix || undefined, 
-        pattern: keyPattern,
-        limit: 100 
-      } 
-    }),
+    queryFn: () => adminApi.getRedisKeys(keyPattern),
     enabled: true,
     onError: (error) => {
       toast.error('Redis keys yüklenemedi: ' + error.message)
@@ -39,7 +33,7 @@ const Redis = () => {
   // Load key detail
   const loadKeyDetail = async (keyName) => {
     try {
-      const response = await api.get(`/admin/redis/key/${encodeURIComponent(keyName)}`)
+      const response = await adminApi.getRedisKey(encodeURIComponent(keyName))
       setKeyDetail(response)
       setSelectedKey(keyName)
     } catch (error) {
@@ -54,7 +48,7 @@ const Redis = () => {
     }
 
     try {
-      await api.delete(`/admin/redis/key/${encodeURIComponent(keyName)}`)
+      await adminApi.deleteRedisKey(encodeURIComponent(keyName))
       toast.success('Key başarıyla silindi')
       refetchKeys()
       refetchStats()
