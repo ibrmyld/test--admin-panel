@@ -1,6 +1,12 @@
 import { API_CONFIG } from '../config/api';
+import { createClient } from '@supabase/supabase-js';
 
-// Admin API Service
+// Supabase direkt bağlantı - admin işlemler için
+const supabaseUrl = 'https://your-project-id.supabase.co';
+const supabaseAnonKey = 'your-anon-key';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Backend sadece login doğrulama için
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Get auth token - admin panel httpOnly cookies kullanır
