@@ -35,6 +35,22 @@ const Dashboard = () => {
   useEffect(() => {
     loadDashboardData()
     checkSystemHealth()
+    
+    // REALTIME - Her 5 saniyede dashboard verilerini güncelle
+    const dashboardInterval = setInterval(() => {
+      loadDashboardData()
+    }, 5000)
+    
+    // REALTIME - Her 3 saniyede sistem durumunu kontrol et
+    const healthInterval = setInterval(() => {
+      checkSystemHealth()
+    }, 3000)
+    
+    // Cleanup intervals
+    return () => {
+      clearInterval(dashboardInterval)
+      clearInterval(healthInterval)
+    }
   }, [])
 
   const loadDashboardData = async () => {

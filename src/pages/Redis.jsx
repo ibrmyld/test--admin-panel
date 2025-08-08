@@ -10,21 +10,22 @@ const Redis = () => {
   const [selectedKey, setSelectedKey] = useState(null)
   const [keyDetail, setKeyDetail] = useState(null)
 
-  // Redis Stats Query
+  // Redis Stats Query - REALTIME (2 saniyede bir)
   const { data: redisStats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ['redisStats'],
     queryFn: () => adminApi.getRedisStats(),
-    refetchInterval: 5000, // Auto refresh every 5 seconds
+    refetchInterval: 2000, // 2 saniye - daha hızlı
     onError: (error) => {
       toast.error('Redis stats yüklenemedi: ' + error.message)
     }
   })
 
-  // Redis Keys Query
+  // Redis Keys Query - REALTIME (10 saniyede bir)
   const { data: redisKeys, isLoading: keysLoading, refetch: refetchKeys } = useQuery({
     queryKey: ['redisKeys', selectedPrefix, keyPattern],
     queryFn: () => adminApi.getRedisKeys(keyPattern),
     enabled: true,
+    refetchInterval: 10000, // 10 saniye - keys daha az değişir
     onError: (error) => {
       toast.error('Redis keys yüklenemedi: ' + error.message)
     }
