@@ -22,6 +22,7 @@ const Products = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [page, setPage] = useState(1);
 
   // Form data for add/edit
   const [formData, setFormData] = useState({
@@ -48,8 +49,21 @@ const Products = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      // TODO: Backend'e admin products endpoint eklenecek
-      // Şimdilik mock data
+      
+      // Backend API'den ürünleri al
+      const response = await adminApi.content.products.list({
+        page,
+        per_page: 10,
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(searchTerm && { search: searchTerm })
+      });
+      
+      setProducts(response.products || []);
+      
+    } catch (error) {
+      console.error('Error loading products:', error);
+      
+      // Fallback mock data in case of error
       const mockProducts = [
         {
           id: '1',
@@ -118,7 +132,7 @@ const Products = () => {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [page, statusFilter, searchTerm]);
 
   // Filter products
   const filteredProducts = products.filter(product => {
@@ -161,48 +175,54 @@ const Products = () => {
   // Add product
   const handleAddProduct = async () => {
     try {
-      // TODO: Backend API call
-      console.log('Adding product:', formData);
-      
-      // Mock implementation
-      const newProduct = {
-        id: Date.now().toString(),
+      // Prepare data for API
+      const productData = {
         ...formData,
         price: parseFloat(formData.price),
         sale_price: formData.sale_price ? parseFloat(formData.sale_price) : null,
         stock_quantity: parseInt(formData.stock_quantity),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        gallery_images: formData.gallery_images ? formData.gallery_images.split(',').map(url => url.trim()).filter(Boolean) : []
       };
       
-      setProducts(prev => [newProduct, ...prev]);
+      // Backend API call
+      const newProduct = await adminApi.content.products.create(productData);
+      
+      // Refresh products list
+      await loadProducts();
+      
       setShowAddModal(false);
       resetForm();
       
     } catch (error) {
       console.error('Error adding product:', error);
+      alert('Ürün eklenirken hata oluştu: ' + (error.detail || error.message));
     }
   };
 
   // Edit product
   const handleEditProduct = async () => {
     try {
-      // TODO: Backend API call
-      console.log('Editing product:', selectedProduct.id, formData);
+      // Prepare data for API (only changed fields)
+      const productData = {};
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== '' && formData[key] !== null) {
+          if (key === 'price' || key === 'sale_price') {
+            productData[key] = formData[key] ? parseFloat(formData[key]) : null;
+          } else if (key === 'stock_quantity') {
+            productData[key] = parseInt(formData[key]);
+          } else if (key === 'gallery_images') {
+            productData[key] = formData[key] ? formData[key].split(',').map(url => url.trim()).filter(Boolean) : [];
+          } else {
+            productData[key] = formData[key];
+          }
+        }
+      });
       
-      // Mock implementation
-      setProducts(prev => prev.map(p => 
-        p.id === selectedProduct.id 
-          ? { 
-              ...p, 
-              ...formData,
-              price: parseFloat(formData.price),
-              sale_price: formData.sale_price ? parseFloat(formData.sale_price) : null,
-              stock_quantity: parseInt(formData.stock_quantity),
-              updated_at: new Date().toISOString()
-            }
-          : p
-      ));
+      // Backend API call
+      await adminApi.content.products.update(selectedProduct.id, productData);
+      
+      // Refresh products list
+      await loadProducts();
       
       setShowEditModal(false);
       setSelectedProduct(null);
@@ -210,6 +230,7 @@ const Products = () => {
       
     } catch (error) {
       console.error('Error editing product:', error);
+      alert('Ürün güncellenirken hata oluştu: ' + (error.detail || error.message));
     }
   };
 
@@ -218,14 +239,15 @@ const Products = () => {
     if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
     
     try {
-      // TODO: Backend API call
-      console.log('Deleting product:', productId);
+      // Backend API call
+      await adminApi.content.products.delete(productId);
       
-      // Mock implementation
-      setProducts(prev => prev.filter(p => p.id !== productId));
+      // Refresh products list
+      await loadProducts();
       
     } catch (error) {
       console.error('Error deleting product:', error);
+      alert('Ürün silinirken hata oluştu: ' + (error.detail || error.message));
     }
   };
 
@@ -266,7 +288,7 @@ const Products = () => {
       slug: product.slug,
       status: product.status,
       featured_image: product.featured_image || '',
-      gallery_images: product.gallery_images || '',
+              gallery_images: product.gallery_images ? product.gallery_images.join(', ') : '',
       stock_quantity: product.stock_quantity.toString(),
       is_featured: product.is_featured,
       is_digital: product.is_digital,

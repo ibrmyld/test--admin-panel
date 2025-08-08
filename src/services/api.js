@@ -232,6 +232,41 @@ export const adminApi = {
       approve: async (id) => {
         return await api.post(API_CONFIG.endpoints.adminContent.comments.approve(id));
       }
+    },
+
+    // ===== PRODUCTS =====
+    products: {
+      list: async (params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        return await api.get(`/api/admin/products${query ? `?${query}` : ''}`);
+      },
+
+      detail: async (id) => {
+        return await api.get(`/api/admin/products/${id}`);
+      },
+
+      create: async (data) => {
+        return await api.post('/api/admin/products', data);
+      },
+
+      update: async (id, data) => {
+        return await api.put(`/api/admin/products/${id}`, data);
+      },
+
+      delete: async (id) => {
+        return await api.delete(`/api/admin/products/${id}`);
+      },
+
+      bulkUpdateStatus: async (productIds, status) => {
+        return await api.patch('/api/admin/products/bulk/status', {
+          product_ids: productIds,
+          status
+        });
+      },
+
+      getStats: async () => {
+        return await api.get('/api/admin/products/stats/overview');
+      }
     }
   },
 
