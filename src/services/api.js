@@ -1,16 +1,12 @@
 import { createApiUrl } from '../config/api';
 
 // Admin API Service
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://raliux-backend.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Get auth token
+// Get auth token - admin panel httpOnly cookies kullanır
 const getAuthToken = () => {
-  try {
-    return localStorage.getItem('admin_token') || localStorage.getItem('token');
-  } catch (e) {
-    console.warn('Token access error:', e);
-    return null;
-  }
+  // Admin panel httpOnly cookies kullanır, token gerekmez
+  return null;
 };
 
 // API request helper
@@ -25,10 +21,9 @@ export const apiRequest = async (endpoint, options = {}) => {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
-    credentials: 'include',
+    credentials: 'include', // httpOnly cookies için gerekli
     ...options,
   };
 
@@ -36,10 +31,10 @@ export const apiRequest = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
     
     if (response.status === 401) {
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('token');
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('admin_login_time');
       window.location.href = '/login';
-      throw new Error('Authentication failed');
+      throw new Error('Session expired');
     }
     
     if (!response.ok) {
@@ -63,64 +58,105 @@ export const apiRequest = async (endpoint, options = {}) => {
   }
 };
 
-// Admin API functions
-export const adminApi = {
-  // Authentication
-  login: async (email, password) => {
-    const response = await apiRequest('/api/auth/login', {
+// Simple API helper
+export const api = {
+  get: async (endpoint, options = {}) => {
+    const { params, ...restOptions } = options;
+    let url = endpoint;
+    
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value);
+        }
+      });
+      url += `?${searchParams.toString()}`;
+    }
+    
+    const response = await apiRequest(url, { method: 'GET', ...restOptions });
+    return await response.json();
+  },
+
+  post: async (endpoint, data, options = {}) => {
+    const response = await apiRequest(endpoint, {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(data),
+      ...options,
     });
     return await response.json();
   },
 
-  // Dashboard stats
-  getStats: async () => {
-    try {
-      const response = await apiRequest('/api/admin/stats');
-      return await response.json();
-    } catch (error) {
-      // Fallback data for demo
-      return {
-        total_posts: 25,
-        total_users: 150,
-        total_products: 8,
-        total_comments: 89
-      };
-    }
+  put: async (endpoint, data, options = {}) => {
+    const response = await apiRequest(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options,
+    });
+    return await response.json();
+  },
+
+  delete: async (endpoint, options = {}) => {
+    const response = await apiRequest(endpoint, {
+      method: 'DELETE',
+      ...options,
+    });
+    return await response.json();
+  },
+};
+
+// Admin API functions
+export const adminApi = {
+  // Authentication
+  login: async (email, password) => {
+    return await api.post('/api/admin/auth/login', { email, password });
+  },
+
+  logout: async () => {
+    return await api.post('/api/admin/auth/logout');
+  },
+
+  getProfile: async () => {
+    return await api.get('/api/admin/auth/profile');
+  },
+
+  verify: async () => {
+    return await api.get('/api/admin/auth/verify');
+  },
+
+  // Dashboard
+  getOverview: async () => {
+    return await api.get('/api/admin/dashboard/overview');
+  },
+
+  getHealth: async () => {
+    return await api.get('/api/admin/dashboard/health');
+  },
+
+  getActivity: async (params = {}) => {
+    return await api.get('/api/admin/dashboard/activity', { params });
   },
 
   // Posts management
   getPosts: async () => {
     try {
-      const response = await apiRequest('/api/posts');
-      return await response.json();
+      const response = await api.get('/api/posts');
+      return response;
     } catch (error) {
       return [];
     }
   },
 
   createPost: async (postData) => {
-    const response = await apiRequest('/api/posts', {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
-    return await response.json();
+    return await api.post('/api/posts', postData);
   },
 
   updatePost: async (id, postData) => {
-    const response = await apiRequest(`/api/posts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(postData),
-    });
-    return await response.json();
+    return await api.put(`/api/posts/${id}`, postData);
   },
 
   deletePost: async (id) => {
-    const response = await apiRequest(`/api/posts/${id}`, {
-      method: 'DELETE',
-    });
-    return await response.json();
+    return await api.delete(`/api/posts/${id}`);
   },
 };
 

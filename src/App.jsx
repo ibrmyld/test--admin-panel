@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 // Pages
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Redis from './pages/Redis'
 
 // Components
 import Sidebar from './components/Sidebar'
@@ -68,6 +69,13 @@ function AppContent() {
         <ProtectedRoute>
           <AdminLayout>
             <Dashboard />
+          </AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/redis" element={
+        <ProtectedRoute>
+          <AdminLayout>
+            <Redis />
           </AdminLayout>
         </ProtectedRoute>
       } />
