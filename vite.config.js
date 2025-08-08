@@ -30,13 +30,17 @@ export default defineConfig({
     port: 5173,
     host: true,
     strictPort: false,
-    open: true
+    open: true,
+    // Allow Railway (and other) hosts in dev if proxied
+    allowedHosts: true
   },
   preview: {
     port: process.env.PORT || 8080,
     host: '0.0.0.0',
     strictPort: true,
-    cors: true
+    cors: true,
+    // Fix: allow Railway domain for Vite preview in production
+    allowedHosts: true
   },
   esbuild: {
     target: 'esnext',
