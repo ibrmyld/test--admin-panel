@@ -1,7 +1,13 @@
-import { createApiUrl } from '../config/api';
+import { API_CONFIG } from '../config/api';
+import { createClient } from '@supabase/supabase-js';
 
-// Admin API Service
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://raliux-projects-backend.up.railway.app';
+// Supabase direkt bağlantı - admin işlemler için
+const supabaseUrl = 'https://your-project-id.supabase.co';
+const supabaseAnonKey = 'your-anon-key';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Backend sadece login doğrulama için
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Get auth token - admin panel httpOnly cookies kullanır
 const getAuthToken = () => {
@@ -105,80 +111,142 @@ export const api = {
   },
 };
 
-// Admin API functions
+// ===== ADMIN API FUNCTIONS =====
 export const adminApi = {
-  // Authentication
-  login: async (email, password) => {
-    return await api.post('/api/admin/auth/login', { email, password });
-  },
+  // ===== AUTHENTICATION =====
+  auth: {
+    login: async (email, password) => {
+      return await api.post(API_CONFIG.endpoints.adminAuth.login, { email, password });
+    },
 
-  logout: async () => {
-    return await api.post('/api/admin/auth/logout');
-  },
+    logout: async () => {
+      return await api.post(API_CONFIG.endpoints.adminAuth.logout);
+    },
 
-  getProfile: async () => {
-    return await api.get('/api/admin/auth/profile');
-  },
+    verify: async () => {
+      return await api.get(API_CONFIG.endpoints.adminAuth.verify);
+    },
 
-  verify: async () => {
-    return await api.get('/api/admin/auth/verify');
-  },
-
-  // Dashboard
-  getOverview: async () => {
-    return await api.get('/api/admin/dashboard/overview');
-  },
-
-  getHealth: async () => {
-    return await api.get('/api/admin/dashboard/health');
-  },
-
-  getActivity: async (params = {}) => {
-    return await api.get('/api/admin/dashboard/activity', { params });
-  },
-
-  // Redis Management
-  getRedisStats: async () => {
-    return await api.get('/api/admin/redis/stats');
-  },
-
-  getRedisKeys: async (pattern = '*') => {
-    return await api.get('/api/admin/redis/keys', { params: { pattern } });
-  },
-
-  getRedisKey: async (keyName) => {
-    return await api.get(`/api/admin/redis/key/${keyName}`);
-  },
-
-  deleteRedisKey: async (keyName) => {
-    return await api.delete(`/api/admin/redis/key/${keyName}`);
-  },
-
-  flushRedis: async () => {
-    return await api.post('/api/admin/redis/flush');
-  },
-
-  // Posts management
-  getPosts: async () => {
-    try {
-      const response = await api.get('/api/posts');
-      return response;
-    } catch (error) {
-      return [];
+    getProfile: async () => {
+      return await api.get(API_CONFIG.endpoints.adminAuth.profile);
     }
   },
 
-  createPost: async (postData) => {
-    return await api.post('/api/posts', postData);
+  // ===== DASHBOARD =====
+  dashboard: {
+    getOverview: async () => {
+      return await api.get(API_CONFIG.endpoints.adminDashboard.overview);
+    },
+
+    getHealth: async () => {
+      return await api.get(API_CONFIG.endpoints.adminDashboard.health);
+    },
+
+    getStats: async () => {
+      return await api.get(API_CONFIG.endpoints.adminDashboard.stats);
+    }
   },
 
-  updatePost: async (id, postData) => {
-    return await api.put(`/api/posts/${id}`, postData);
+  // ===== REDIS MANAGEMENT =====
+  redis: {
+    getStats: async () => {
+      return await api.get(API_CONFIG.endpoints.adminRedis.stats);
+    },
+
+    getKeys: async (pattern = '*') => {
+      return await api.get(API_CONFIG.endpoints.adminRedis.keys, { params: { pattern } });
+    },
+
+    getKey: async (keyName) => {
+      return await api.get(API_CONFIG.endpoints.adminRedis.key(keyName));
+    },
+
+    deleteKey: async (keyName) => {
+      return await api.delete(API_CONFIG.endpoints.adminRedis.deleteKey(keyName));
+    },
+
+    flush: async () => {
+      return await api.post(API_CONFIG.endpoints.adminRedis.flush);
+    }
   },
 
-  deletePost: async (id) => {
-    return await api.delete(`/api/posts/${id}`);
+  // ===== CONTENT MANAGEMENT =====
+  content: {
+    posts: {
+      list: async (params = {}) => {
+        return await api.get(API_CONFIG.endpoints.adminContent.posts.list, { params });
+      },
+
+      create: async (postData) => {
+        return await api.post(API_CONFIG.endpoints.adminContent.posts.create, postData);
+      },
+
+      update: async (id, postData) => {
+        return await api.put(API_CONFIG.endpoints.adminContent.posts.update(id), postData);
+      },
+
+      delete: async (id) => {
+        return await api.delete(API_CONFIG.endpoints.adminContent.posts.delete(id));
+      },
+
+      publish: async (id) => {
+        return await api.post(API_CONFIG.endpoints.adminContent.posts.publish(id));
+      },
+
+      unpublish: async (id) => {
+        return await api.post(API_CONFIG.endpoints.adminContent.posts.unpublish(id));
+      }
+    },
+
+    users: {
+      list: async (params = {}) => {
+        return await api.get(API_CONFIG.endpoints.adminContent.users.list, { params });
+      },
+
+      detail: async (id) => {
+        return await api.get(API_CONFIG.endpoints.adminContent.users.detail(id));
+      },
+
+      ban: async (id, reason = '') => {
+        return await api.post(API_CONFIG.endpoints.adminContent.users.ban(id), { reason });
+      },
+
+      unban: async (id) => {
+        return await api.post(API_CONFIG.endpoints.adminContent.users.unban(id));
+      },
+
+      updateRole: async (id, role) => {
+        return await api.put(API_CONFIG.endpoints.adminContent.users.role(id), { role });
+      }
+    },
+
+    comments: {
+      list: async (params = {}) => {
+        return await api.get(API_CONFIG.endpoints.adminContent.comments.list, { params });
+      },
+
+      delete: async (id) => {
+        return await api.delete(API_CONFIG.endpoints.adminContent.comments.delete(id));
+      },
+
+      approve: async (id) => {
+        return await api.post(API_CONFIG.endpoints.adminContent.comments.approve(id));
+      }
+    }
   },
+
+  // ===== BACKWARD COMPATIBILITY (old API calls) =====
+  login: async (email, password) => adminApi.auth.login(email, password),
+  logout: async () => adminApi.auth.logout(),
+  verify: async () => adminApi.auth.verify(),
+  getProfile: async () => adminApi.auth.getProfile(),
+  getOverview: async () => adminApi.dashboard.getOverview(),
+  getHealth: async () => adminApi.dashboard.getHealth(),
+  getRedisStats: async () => adminApi.redis.getStats(),
+  getRedisKeys: async (pattern) => adminApi.redis.getKeys(pattern),
+  getRedisKey: async (keyName) => adminApi.redis.getKey(keyName),
+  deleteRedisKey: async (keyName) => adminApi.redis.deleteKey(keyName),
+  flushRedis: async () => adminApi.redis.flush()
 };
 
 export default adminApi;

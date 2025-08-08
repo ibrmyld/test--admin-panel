@@ -4,39 +4,58 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://raliux-projects-ba
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
   endpoints: {
-    auth: {
-      login: '/api/auth/login',
-      logout: '/api/auth/logout',
-      profile: '/api/auth/profile'
+    // ===== ADMIN AUTH =====
+    adminAuth: {
+      login: '/api/admin/auth/login',
+      logout: '/api/admin/auth/logout',
+      verify: '/api/admin/auth/verify',
+      profile: '/api/admin/auth/profile'
     },
-    admin: {
-      auth: {
-        login: '/api/admin/auth/login',
-        logout: '/api/admin/auth/logout',
-        profile: '/api/admin/auth/profile',
-        verify: '/api/admin/auth/verify'
+    
+    // ===== ADMIN DASHBOARD =====  
+    adminDashboard: {
+      overview: '/api/admin/dashboard/overview',
+      health: '/api/admin/dashboard/health',
+      stats: '/api/admin/dashboard/stats'
+    },
+    
+    // ===== ADMIN REDIS MANAGEMENT =====
+    adminRedis: {
+      stats: '/api/admin/redis/stats',
+      keys: '/api/admin/redis/keys',
+      key: (keyName) => `/api/admin/redis/key/${keyName}`,
+      deleteKey: (keyName) => `/api/admin/redis/key/${keyName}`,
+      flush: '/api/admin/redis/flush'
+    },
+    
+    // ===== ADMIN CONTENT MANAGEMENT =====
+    adminContent: {
+      posts: {
+        list: '/api/admin/posts',
+        create: '/api/admin/posts',
+        update: (id) => `/api/admin/posts/${id}`,
+        delete: (id) => `/api/admin/posts/${id}`,
+        publish: (id) => `/api/admin/posts/${id}/publish`,
+        unpublish: (id) => `/api/admin/posts/${id}/unpublish`
       },
-      redis: {
-        stats: '/api/admin/redis/stats',
-        keys: '/api/admin/redis/keys',
-        key: (keyName) => `/api/admin/redis/key/${keyName}`,
-        deleteKey: (keyName) => `/api/admin/redis/key/${keyName}`,
-        flush: '/api/admin/redis/flush',
-        live: '/api/admin/redis/monitor/live'
+      users: {
+        list: '/api/admin/users',
+        detail: (id) => `/api/admin/users/${id}`,
+        ban: (id) => `/api/admin/users/${id}/ban`,
+        unban: (id) => `/api/admin/users/${id}/unban`,
+        role: (id) => `/api/admin/users/${id}/role`
       },
-      dashboard: {
-        overview: '/api/admin/dashboard/overview',
-        health: '/api/admin/dashboard/health',
-        activity: '/api/admin/dashboard/activity',
-        users: '/api/admin/dashboard/users',
-        cache: '/api/admin/dashboard/cache'
+      comments: {
+        list: '/api/admin/comments',
+        delete: (id) => `/api/admin/comments/${id}`,
+        approve: (id) => `/api/admin/comments/${id}/approve`
       }
     },
-    posts: {
-      list: '/api/posts',
-      create: '/api/posts',
-      update: (id) => `/api/posts/${id}`,
-      delete: (id) => `/api/posts/${id}`
+    
+    // ===== PUBLIC API (fallback) =====
+    public: {
+      posts: '/api/posts',
+      auth: '/api/auth'
     }
   }
 };
