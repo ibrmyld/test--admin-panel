@@ -1,7 +1,7 @@
 import { createApiUrl } from '../config/api';
 
 // Admin API Service
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://raliux-projects-backend.up.railway.app';
 
 // Get auth token - admin panel httpOnly cookies kullanır
 const getAuthToken = () => {
@@ -135,6 +135,27 @@ export const adminApi = {
 
   getActivity: async (params = {}) => {
     return await api.get('/api/admin/dashboard/activity', { params });
+  },
+
+  // Redis Management
+  getRedisStats: async () => {
+    return await api.get('/api/admin/redis/stats');
+  },
+
+  getRedisKeys: async (pattern = '*') => {
+    return await api.get('/api/admin/redis/keys', { params: { pattern } });
+  },
+
+  getRedisKey: async (keyName) => {
+    return await api.get(`/api/admin/redis/key/${keyName}`);
+  },
+
+  deleteRedisKey: async (keyName) => {
+    return await api.delete(`/api/admin/redis/key/${keyName}`);
+  },
+
+  flushRedis: async () => {
+    return await api.post('/api/admin/redis/flush');
   },
 
   // Posts management
