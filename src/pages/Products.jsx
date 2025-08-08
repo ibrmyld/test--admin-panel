@@ -123,8 +123,9 @@ const Products = () => {
       ];
       
       setProducts(mockProducts);
-    } catch (error) {
-      console.error('Error loading products:', error);
+    } catch (fallbackError) {
+      console.error('Fallback error:', fallbackError);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
