@@ -13,6 +13,7 @@ import {
   Upload
 } from 'lucide-react';
 import { adminApi } from '../services/api';
+import ImageUpload from '../components/ImageUpload';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -123,9 +124,6 @@ const Products = () => {
       ];
       
       setProducts(mockProducts);
-    } catch (fallbackError) {
-      console.error('Fallback error:', fallbackError);
-      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -249,6 +247,67 @@ const Products = () => {
     } catch (error) {
       console.error('Error deleting product:', error);
       alert('Ürün silinirken hata oluştu: ' + (error.detail || error.message));
+    }
+  };
+
+  // Image upload handlers
+  const handleFeaturedImageUpload = async (file) => {
+    try {
+      const result = await adminApi.media.upload(file, 'featured', 'products');
+      setFormData(prev => ({
+        ...prev,
+        featured_image: result.url
+      }));
+    } catch (error) {
+      console.error('Featured image upload error:', error);
+      throw new Error('Ana görsel yükleme başarısız');
+    }
+  };
+
+  const handleGalleryImagesUpload = async (files) => {
+    try {
+      const result = await adminApi.media.uploadMultiple(files, 'gallery', 'products');
+      const newUrls = result.uploaded.map(upload => upload.url);
+      
+      setFormData(prev => ({
+        ...prev,
+        gallery_images: prev.gallery_images 
+          ? prev.gallery_images + ',' + newUrls.join(',')
+          : newUrls.join(',')
+      }));
+    } catch (error) {
+      console.error('Gallery images upload error:', error);
+      throw new Error('Galeri görselleri yükleme başarısız');
+    }
+  };
+
+  const handleRemoveFeaturedImage = async (imageUrl) => {
+    try {
+      await adminApi.media.delete(imageUrl);
+      setFormData(prev => ({
+        ...prev,
+        featured_image: ''
+      }));
+    } catch (error) {
+      console.error('Remove featured image error:', error);
+      throw new Error('Ana görsel silme başarısız');
+    }
+  };
+
+  const handleRemoveGalleryImage = async (imageUrl) => {
+    try {
+      await adminApi.media.delete(imageUrl);
+      setFormData(prev => {
+        const currentImages = prev.gallery_images.split(',').filter(Boolean);
+        const updatedImages = currentImages.filter(img => img !== imageUrl);
+        return {
+          ...prev,
+          gallery_images: updatedImages.join(',')
+        };
+      });
+    } catch (error) {
+      console.error('Remove gallery image error:', error);
+      throw new Error('Galeri görseli silme başarısız');
     }
   };
 
@@ -642,15 +701,15 @@ const Products = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Öne Çıkan Resim URL
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Öne Çıkan Resim
                     </label>
-                    <input
-                      type="url"
-                      name="featured_image"
-                      value={formData.featured_image}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <ImageUpload
+                      onUpload={handleFeaturedImageUpload}
+                      onRemove={handleRemoveFeaturedImage}
+                      currentImages={formData.featured_image ? [formData.featured_image] : []}
+                      multiple={false}
+                      buttonText="Ana Görsel Yükle"
                     />
                   </div>
                   
@@ -708,6 +767,21 @@ const Products = () => {
                     </label>
                   </div>
                 </div>
+              </div>
+              
+              {/* Gallery Images Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Galeri Görselleri
+                </label>
+                <ImageUpload
+                  onUpload={handleGalleryImagesUpload}
+                  onRemove={handleRemoveGalleryImage}
+                  currentImages={formData.gallery_images ? formData.gallery_images.split(',').filter(Boolean) : []}
+                  multiple={true}
+                  maxFiles={10}
+                  buttonText="Galeri Görselleri Yükle"
+                />
               </div>
               
               <div>
@@ -864,15 +938,15 @@ const Products = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Öne Çıkan Resim URL
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Öne Çıkan Resim
                     </label>
-                    <input
-                      type="url"
-                      name="featured_image"
-                      value={formData.featured_image}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <ImageUpload
+                      onUpload={handleFeaturedImageUpload}
+                      onRemove={handleRemoveFeaturedImage}
+                      currentImages={formData.featured_image ? [formData.featured_image] : []}
+                      multiple={false}
+                      buttonText="Ana Görsel Yükle"
                     />
                   </div>
                   
@@ -930,6 +1004,21 @@ const Products = () => {
                     </label>
                   </div>
                 </div>
+              </div>
+              
+              {/* Gallery Images Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Galeri Görselleri
+                </label>
+                <ImageUpload
+                  onUpload={handleGalleryImagesUpload}
+                  onRemove={handleRemoveGalleryImage}
+                  currentImages={formData.gallery_images ? formData.gallery_images.split(',').filter(Boolean) : []}
+                  multiple={true}
+                  maxFiles={10}
+                  buttonText="Galeri Görselleri Yükle"
+                />
               </div>
               
               <div>
