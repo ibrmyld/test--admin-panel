@@ -10,9 +10,13 @@ import {
   Activity,
   Calendar,
   Download,
-  RefreshCw
+  RefreshCw,
+  BarChart2,
+  Globe
 } from 'lucide-react';
 import { adminApi } from '../services/api';
+import GoogleAnalytics from '../components/GoogleAnalytics';
+import { trackAdminAction } from '../config/googleAnalytics';
 
 const Analytics = () => {
   const [loading, setLoading] = useState(true);
@@ -20,6 +24,7 @@ const Analytics = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [chartData, setChartData] = useState({});
   const [realTimeData, setRealTimeData] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' veya 'google-analytics'
 
   // Load analytics data
   const loadAnalytics = async () => {
@@ -100,7 +105,13 @@ const Analytics = () => {
 
   useEffect(() => {
     loadAnalytics();
-  }, [timeRange]);
+    
+    // Track admin analytics view
+    trackAdminAction('view_analytics', { 
+      tab: activeTab,
+      time_range: timeRange 
+    });
+  }, [timeRange, activeTab]);
 
   // Auto-refresh real-time data
   useEffect(() => {
@@ -157,11 +168,54 @@ const Analytics = () => {
     );
   }
 
+  // Tab değiştirici
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    trackAdminAction('switch_analytics_tab', { tab });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Header with Tabs */}
+      <div className="space-y-4">
         <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+        
+        {/* Tab Navigation */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => handleTabChange('dashboard')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'dashboard'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <BarChart2 className="w-4 h-4 inline mr-2" />
+              Admin Dashboard
+            </button>
+            <button
+              onClick={() => handleTabChange('google-analytics')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'google-analytics'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Globe className="w-4 h-4 inline mr-2" />
+              Google Analytics
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'google-analytics' ? (
+        <GoogleAnalytics />
+      ) : (
+        <div className="space-y-6">
+          {/* Original Dashboard Content */}
+          <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           {/* Time Range Selector */}
           <select
@@ -368,7 +422,8 @@ const Analytics = () => {
             <p className="text-sm text-gray-600">Aktif Admin</p>
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
