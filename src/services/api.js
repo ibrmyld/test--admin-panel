@@ -232,6 +232,146 @@ export const adminApi = {
       approve: async (id) => {
         return await api.post(API_CONFIG.endpoints.adminContent.comments.approve(id));
       }
+    },
+
+    // ===== PRODUCTS =====
+    products: {
+      list: async (params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        return await api.get(`/api/admin/products${query ? `?${query}` : ''}`);
+      },
+
+      detail: async (id) => {
+        return await api.get(`/api/admin/products/${id}`);
+      },
+
+      create: async (data) => {
+        return await api.post('/api/admin/products', data);
+      },
+
+      update: async (id, data) => {
+        return await api.put(`/api/admin/products/${id}`, data);
+      },
+
+      delete: async (id) => {
+        return await api.delete(`/api/admin/products/${id}`);
+      },
+
+      bulkUpdateStatus: async (productIds, status) => {
+        return await api.patch('/api/admin/products/bulk/status', {
+          product_ids: productIds,
+          status
+        });
+      },
+
+      getStats: async () => {
+        return await api.get('/api/admin/products/stats/overview');
+      }
+    },
+
+    // ===== MEDIA =====
+    media: {
+      upload: async (file, scope = 'general', bucket = 'products') => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('scope', scope);
+        formData.append('bucket', bucket);
+        
+        return await api.post('/api/admin/media/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      },
+
+      uploadMultiple: async (files, scope = 'general', bucket = 'products') => {
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('files', file);
+        });
+        formData.append('scope', scope);
+        formData.append('bucket', bucket);
+        
+        return await api.post('/api/admin/media/upload-multiple', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      },
+
+      delete: async (url, bucket = 'products') => {
+        return await api.delete(`/api/admin/media?url=${encodeURIComponent(url)}&bucket=${bucket}`);
+      }
+    },
+
+    // ===== PRODUCT MEDIA =====
+    productMedia: {
+      uploadFeaturedImage: async (productId, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        return await api.post(`/api/admin/products/${productId}/featured-image`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      },
+
+      uploadGalleryImages: async (productId, files) => {
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('files', file);
+        });
+        
+        return await api.post(`/api/admin/products/${productId}/gallery`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      },
+
+      removeGalleryImage: async (productId, url) => {
+        const formData = new FormData();
+        formData.append('url', url);
+        
+        return await api.delete(`/api/admin/products/${productId}/gallery`, {
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      },
+
+      removeFeaturedImage: async (productId) => {
+        return await api.delete(`/api/admin/products/${productId}/featured-image`);
+      }
+    },
+
+    // ===== ANALYTICS =====
+    analytics: {
+      getOverview: async (days = 30) => {
+        return await api.get(`/api/admin/analytics/overview?days=${days}`);
+      },
+
+      getChartData: async (chartType, days = 30) => {
+        return await api.get(`/api/admin/analytics/charts/${chartType}?days=${days}`);
+      },
+
+      getRealTime: async () => {
+        return await api.get('/api/admin/analytics/real-time');
+      },
+
+      trackEvent: async (eventType, eventData, sessionId = null) => {
+        return await api.post('/api/admin/analytics/track', {
+          event_type: eventType,
+          event_data: eventData,
+          session_id: sessionId
+        });
+      },
+
+      exportData: async (format = 'json', days = 30) => {
+        return await api.get(`/api/admin/analytics/export?format=${format}&days=${days}`);
+      }
     }
   },
 

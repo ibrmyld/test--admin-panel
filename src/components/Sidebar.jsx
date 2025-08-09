@@ -1,12 +1,14 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Database, Users, Activity, Settings } from 'lucide-react'
+import { Home, Database, Users, Activity, Settings, Package, BarChart3 } from 'lucide-react'
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation()
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Ürünler', href: '/products', icon: Package },
     { name: 'Redis Dashboard', href: '/redis', icon: Database },
     { name: 'Kullanıcılar', href: '/users', icon: Users },
     { name: 'Aktiviteler', href: '/activity', icon: Activity },
