@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import { initGA } from './config/googleAnalytics'
 
 // Pages
 import Login from './pages/Login'
@@ -100,6 +101,11 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Google Analytics'i başlat
+    initGA();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

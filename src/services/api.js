@@ -347,32 +347,7 @@ export const adminApi = {
       }
     },
 
-    // ===== ANALYTICS =====
-    analytics: {
-      getOverview: async (days = 30) => {
-        return await api.get(`/api/admin/analytics/overview?days=${days}`);
-      },
 
-      getChartData: async (chartType, days = 30) => {
-        return await api.get(`/api/admin/analytics/charts/${chartType}?days=${days}`);
-      },
-
-      getRealTime: async () => {
-        return await api.get('/api/admin/analytics/real-time');
-      },
-
-      trackEvent: async (eventType, eventData, sessionId = null) => {
-        return await api.post('/api/admin/analytics/track', {
-          event_type: eventType,
-          event_data: eventData,
-          session_id: sessionId
-        });
-      },
-
-      exportData: async (format = 'json', days = 30) => {
-        return await api.get(`/api/admin/analytics/export?format=${format}&days=${days}`);
-      }
-    }
   },
 
   // ===== BACKWARD COMPATIBILITY (old API calls) =====
