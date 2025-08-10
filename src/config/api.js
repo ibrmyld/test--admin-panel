@@ -49,7 +49,25 @@ export const API_CONFIG = {
         list: '/api/admin/comments',
         delete: (id) => `/api/admin/comments/${id}`,
         approve: (id) => `/api/admin/comments/${id}/approve`
+      },
+      products: {
+        list: '/api/admin/products',
+        create: '/api/admin/products',
+        detail: (id) => `/api/admin/products/${id}`,
+        update: (id) => `/api/admin/products/${id}`,
+        delete: (id) => `/api/admin/products/${id}`,
+        bulkStatus: '/api/admin/products/bulk/status',
+        stats: '/api/admin/products/stats/overview'
       }
+    },
+    
+    // ===== ADMIN MEDIA =====
+    adminMedia: {
+      upload: '/api/admin/media/upload',
+      uploadMultiple: '/api/admin/media/upload-multiple',
+      delete: '/api/admin/media',
+      productFeatured: (id) => `/api/admin/products/${id}/featured-image`,
+      productGallery: (id) => `/api/admin/products/${id}/gallery`
     },
     
     // ===== PUBLIC API (fallback) =====
