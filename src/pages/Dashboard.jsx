@@ -78,9 +78,9 @@ const Dashboard = () => {
       }
       
     } catch (error) {
-      console.error('Dashboard loading error:', error)
+      console.warn('Backend API unavailable, using demo data:', error)
       
-      // Demo fallback data
+      // Demo fallback data (offline mode)
       setStats({
         total_posts: 25,
         total_users: 150,
@@ -88,7 +88,8 @@ const Dashboard = () => {
         total_comments: 89
       })
       
-      toast.error('Dashboard verisi yüklenirken hata oluştu, demo veri gösteriliyor')
+      // Sessiz fallback - kullanıcıya hata gösterme
+      console.info('🔄 Admin panel offline mode - demo data kullanılıyor')
     } finally {
       setLoading(false)
     }
@@ -113,12 +114,12 @@ const Dashboard = () => {
         })
       }
     } catch (error) {
-      console.error('Health check error:', error)
-      // Fallback - varsayılan olarak online göster
+      console.warn('Health check unavailable, using demo status:', error)
+      // Demo mode - sistem sağlıklı görünsün
       setSystemStatus({
-        api: 'online',
-        database: 'online', 
-        cache: 'online'
+        api: 'demo',
+        database: 'demo', 
+        cache: 'demo'
       })
     }
   }
@@ -127,7 +128,8 @@ const Dashboard = () => {
     switch (status) {
       case 'online': return 'text-green-500'
       case 'offline': return 'text-red-500'
-      case 'checking': return 'text-yellow-500'
+      case 'checking': return 'text-gray-500'
+      case 'demo': return 'text-gray-600'
       default: return 'text-gray-500'
     }
   }
@@ -137,6 +139,7 @@ const Dashboard = () => {
       case 'online': return '✅'
       case 'offline': return '❌'
       case 'checking': return '🔄'
+      case 'demo': return '🎭'
       default: return '❓'
     }
   }
