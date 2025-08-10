@@ -247,35 +247,34 @@ export const adminApi = {
     // ===== PRODUCTS =====
     products: {
       list: async (params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        return await api.get(`/api/admin/products${query ? `?${query}` : ''}`);
+        return await api.get(API_CONFIG.endpoints.adminContent.products.list, { params });
       },
 
       detail: async (id) => {
-        return await api.get(`/api/admin/products/${id}`);
+        return await api.get(API_CONFIG.endpoints.adminContent.products.detail(id));
       },
 
       create: async (data) => {
-        return await api.post('/api/admin/products', data);
+        return await api.post(API_CONFIG.endpoints.adminContent.products.create, data);
       },
 
       update: async (id, data) => {
-        return await api.put(`/api/admin/products/${id}`, data);
+        return await api.put(API_CONFIG.endpoints.adminContent.products.update(id), data);
       },
 
       delete: async (id) => {
-        return await api.delete(`/api/admin/products/${id}`);
+        return await api.delete(API_CONFIG.endpoints.adminContent.products.delete(id));
       },
 
       bulkUpdateStatus: async (productIds, status) => {
-        return await api.patch('/api/admin/products/bulk/status', {
+        return await api.patch(API_CONFIG.endpoints.adminContent.products.bulkStatus, {
           product_ids: productIds,
           status
         });
       },
 
       getStats: async () => {
-        return await api.get('/api/admin/products/stats/overview');
+        return await api.get(API_CONFIG.endpoints.adminContent.products.stats);
       }
     },
 
@@ -287,7 +286,7 @@ export const adminApi = {
         formData.append('scope', scope);
         formData.append('bucket', bucket);
         
-        return await api.post('/api/admin/media/upload', formData, {
+        return await api.post(API_CONFIG.endpoints.adminMedia.upload, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -302,7 +301,7 @@ export const adminApi = {
         formData.append('scope', scope);
         formData.append('bucket', bucket);
         
-        return await api.post('/api/admin/media/upload-multiple', formData, {
+        return await api.post(API_CONFIG.endpoints.adminMedia.uploadMultiple, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -310,7 +309,7 @@ export const adminApi = {
       },
 
       delete: async (url, bucket = 'products') => {
-        return await api.delete(`/api/admin/media?url=${encodeURIComponent(url)}&bucket=${bucket}`);
+        return await api.delete(`${API_CONFIG.endpoints.adminMedia.delete}?url=${encodeURIComponent(url)}&bucket=${bucket}`);
       }
     },
 
@@ -320,7 +319,7 @@ export const adminApi = {
         const formData = new FormData();
         formData.append('file', file);
         
-        return await api.post(`/api/admin/products/${productId}/featured-image`, formData, {
+        return await api.post(API_CONFIG.endpoints.adminMedia.productFeatured(productId), formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -333,7 +332,7 @@ export const adminApi = {
           formData.append('files', file);
         });
         
-        return await api.post(`/api/admin/products/${productId}/gallery`, formData, {
+        return await api.post(API_CONFIG.endpoints.adminMedia.productGallery(productId), formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -344,7 +343,7 @@ export const adminApi = {
         const formData = new FormData();
         formData.append('url', url);
         
-        return await api.delete(`/api/admin/products/${productId}/gallery`, {
+        return await api.delete(API_CONFIG.endpoints.adminMedia.productGallery(productId), {
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -353,7 +352,7 @@ export const adminApi = {
       },
 
       removeFeaturedImage: async (productId) => {
-        return await api.delete(`/api/admin/products/${productId}/featured-image`);
+        return await api.delete(API_CONFIG.endpoints.adminMedia.productFeatured(productId));
       }
     },
 
