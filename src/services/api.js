@@ -51,7 +51,12 @@ export const apiRequest = async (endpoint, options = {}) => {
           errorMessage = errorData.detail;
         }
       } catch (e) {
-        // JSON parse error, use default message
+        // JSON parse error - likely HTML response from server
+        if (response.status === 404) {
+          errorMessage = 'Backend API endpoint not found. Check if backend is deployed correctly.';
+        } else if (response.status >= 500) {
+          errorMessage = 'Backend server error. Please try again later.';
+        }
       }
       throw new Error(errorMessage);
     }
@@ -81,7 +86,12 @@ export const api = {
     }
     
     const response = await apiRequest(url, { method: 'GET', ...restOptions });
-    return await response.json();
+    try {
+      return await response.json();
+    } catch (error) {
+      console.error('JSON Parse Error - Response might be HTML:', error);
+      throw new Error('Backend returned invalid response. Check if API is working correctly.');
+    }
   },
 
   post: async (endpoint, data, options = {}) => {
