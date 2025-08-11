@@ -9,10 +9,12 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Backend sadece login doğrulama için
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
-// Environment variables debug (admin-specific)
-console.log('🔧 API Service Debug:');
-console.log('Backend URL:', API_BASE_URL);
-console.log('Environment:', import.meta.env.MODE);
+// Environment variables debug (sadece development modunda)
+if (import.meta.env.DEV) {
+  console.log('🔧 API Service Debug:');
+  console.log('Backend URL:', API_BASE_URL);
+  console.log('Environment:', import.meta.env.MODE);
+}
 
 // Get auth token - admin panel httpOnly cookies kullanır
 const getAuthToken = () => {
@@ -387,8 +389,10 @@ export const adminApi = {
   // ===== BACKEND CONNECTION TEST =====
   testConnection: async () => {
     try {
-      console.log('🔍 Backend bağlantı testi başlıyor...');
-      console.log('Test URL:', `${API_CONFIG.BASE_URL}/health`);
+      if (import.meta.env.DEV) {
+        console.log('🔍 Backend bağlantı testi başlıyor...');
+        console.log('Test URL:', `${API_CONFIG.BASE_URL}/health`);
+      }
       
       const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
         method: 'GET',
@@ -398,15 +402,19 @@ export const adminApi = {
         },
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
+      if (import.meta.env.DEV) {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', [...response.headers.entries()]);
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('✅ Backend bağlantı başarılı:', data);
+      if (import.meta.env.DEV) {
+        console.log('✅ Backend bağlantı başarılı:', data);
+      }
       return { success: true, data };
       
     } catch (error) {

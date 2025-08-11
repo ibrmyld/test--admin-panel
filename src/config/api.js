@@ -1,12 +1,19 @@
 // Admin Panel API Configuration  
 // Railway environment variables'dan backend URL'sini oku
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+let API_BASE_URL = import.meta.env.VITE_API_URL;
 
-// Environment variables debug
-console.log('🔍 Environment Variables Debug:');
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('VITE_GA_MEASUREMENT_ID:', import.meta.env.VITE_GA_MEASUREMENT_ID);
-console.log('All env vars:', import.meta.env);
+// URL protokol kontrolü - Railway'de https:// eklenmemiş olabilir
+if (API_BASE_URL && !API_BASE_URL.startsWith('http')) {
+  API_BASE_URL = `https://${API_BASE_URL}`;
+}
+
+// Environment variables debug (sadece development modunda)
+if (import.meta.env.DEV) {
+  console.log('🔍 Environment Variables Debug:');
+  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('VITE_GA_MEASUREMENT_ID:', import.meta.env.VITE_GA_MEASUREMENT_ID);
+  console.log('All env vars:', import.meta.env);
+}
 
 // Railway environment variables kontrolü
 if (!API_BASE_URL) {
@@ -14,7 +21,9 @@ if (!API_BASE_URL) {
   console.error('Railway dashboard\'dan backend service URL\'sini VITE_API_URL olarak ekleyin');
   console.error('Örnek: https://backend-service-name.up.railway.app');
 } else {
-  console.log('✅ Backend URL bulundu:', API_BASE_URL);
+  if (import.meta.env.DEV) {
+    console.log('✅ Backend URL bulundu:', API_BASE_URL);
+  }
 }
 
 export const API_CONFIG = {

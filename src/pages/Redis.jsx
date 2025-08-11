@@ -5,10 +5,12 @@ import toast from 'react-hot-toast'
 import { adminApi } from '../services/api'
 
 const Redis = () => {
-  // Debug info - Redis environment variables
-  console.log('🔴 Redis Page Debug:');
-  console.log('REDIS_URL (not directly accessible from frontend):', 'Hidden for security');
-  console.log('Backend API URL:', adminApi.getBackendUrl?.() || 'Not available');
+  // Debug info - Redis environment variables (sadece development modunda)
+  if (import.meta.env.DEV) {
+    console.log('🔴 Redis Page Debug:');
+    console.log('REDIS_URL (not directly accessible from frontend):', 'Hidden for security');
+    console.log('Backend API URL:', adminApi.getBackendUrl?.() || 'Not available');
+  }
   const [selectedPrefix, setSelectedPrefix] = useState('')
   const [keyPattern, setKeyPattern] = useState('*')
   const [selectedKey, setSelectedKey] = useState(null)
