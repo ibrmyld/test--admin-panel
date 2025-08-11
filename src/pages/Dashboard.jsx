@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { adminApi } from '../services/api'
+import { API_CONFIG } from '../config/api'
 import { 
   BarChart3, 
   Users, 
@@ -26,6 +27,8 @@ const Dashboard = () => {
     total_comments: 0
   })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [connectionTest, setConnectionTest] = useState(null)
   const [systemStatus, setSystemStatus] = useState({
     api: 'checking',
     database: 'checking',
@@ -68,30 +71,48 @@ const Dashboard = () => {
           total_comments: overviewData.overview?.comments?.total || 0
         })
       } else {
-        // Fallback demo data
+        // API başarısız response döndü
+        setError('Backend API\'den geçersiz response alındı')
         setStats({
-          total_posts: 25,
-          total_users: 150,
-          total_products: 8,
-          total_comments: 89
+          total_posts: 0,
+          total_users: 0,
+          total_products: 0,
+          total_comments: 0
         })
       }
       
     } catch (error) {
-      console.warn('Backend API unavailable, using demo data:', error)
+      console.error('❌ Backend API bağlantı hatası:', error)
+      setError(error.message || 'Backend API\'ye bağlanılamıyor')
       
-      // Demo fallback data (offline mode)
+      // Hata durumunda boş stats
       setStats({
-        total_posts: 25,
-        total_users: 150,
-        total_products: 8,
-        total_comments: 89
+        total_posts: 0,
+        total_users: 0,
+        total_products: 0,
+        total_comments: 0
       })
-      
-      // Sessiz fallback - kullanıcıya hata gösterme
-      console.info('🔄 Admin panel offline mode - demo data kullanılıyor')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const testBackendConnection = async () => {
+    setConnectionTest({ status: 'testing', message: 'Backend bağlantısı test ediliyor...' });
+    
+    const result = await adminApi.testConnection();
+    
+    if (result.success) {
+      setConnectionTest({ 
+        status: 'success', 
+        message: 'Backend bağlantısı başarılı!',
+        data: result.data 
+      });
+    } else {
+      setConnectionTest({ 
+        status: 'error', 
+        message: `Backend bağlantı hatası: ${result.error}` 
+      });
     }
   }
 
@@ -114,12 +135,12 @@ const Dashboard = () => {
         })
       }
     } catch (error) {
-      console.warn('Health check unavailable, using demo status:', error)
-      // Demo mode - sistem sağlıklı görünsün
+      console.error('❌ System health check hatası:', error)
+      // Backend'e ulaşılamıyorsa offline olarak işaretle
       setSystemStatus({
-        api: 'demo',
-        database: 'demo', 
-        cache: 'demo'
+        api: 'offline',
+        database: 'offline', 
+        cache: 'offline'
       })
     }
   }
@@ -128,8 +149,7 @@ const Dashboard = () => {
     switch (status) {
       case 'online': return 'text-green-500'
       case 'offline': return 'text-red-500'
-      case 'checking': return 'text-gray-500'
-      case 'demo': return 'text-gray-600'
+      case 'checking': return 'text-yellow-500'
       default: return 'text-gray-500'
     }
   }
@@ -139,7 +159,6 @@ const Dashboard = () => {
       case 'online': return '✅'
       case 'offline': return '❌'
       case 'checking': return '🔄'
-      case 'demo': return '🎭'
       default: return '❓'
     }
   }
@@ -195,6 +214,58 @@ const Dashboard = () => {
               <Shield className="w-12 h-12 text-blue-400" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Backend Connection Test */}
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Server className="w-6 h-6 text-blue-500" />
+            <h2 className="text-xl font-semibold text-gray-900">Backend Bağlantı Testi</h2>
+          </div>
+          <button
+            onClick={testBackendConnection}
+            disabled={connectionTest?.status === 'testing'}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${connectionTest?.status === 'testing' ? 'animate-spin' : ''}`} />
+            Test Et
+          </button>
+        </div>
+        
+        {connectionTest && (
+          <div className={`p-4 rounded-lg ${
+            connectionTest.status === 'success' ? 'bg-green-50 border border-green-200' :
+            connectionTest.status === 'error' ? 'bg-red-50 border border-red-200' :
+            'bg-yellow-50 border border-yellow-200'
+          }`}>
+            <div className="flex items-center gap-2">
+              {connectionTest.status === 'success' && <span className="text-green-500">✅</span>}
+              {connectionTest.status === 'error' && <span className="text-red-500">❌</span>}
+              {connectionTest.status === 'testing' && <span className="text-yellow-500">🔄</span>}
+              <span className={`font-medium ${
+                connectionTest.status === 'success' ? 'text-green-800' :
+                connectionTest.status === 'error' ? 'text-red-800' :
+                'text-yellow-800'
+              }`}>
+                {connectionTest.message}
+              </span>
+            </div>
+            
+            {connectionTest.data && (
+              <div className="mt-3 text-sm text-gray-600">
+                <p><strong>Backend Version:</strong> {connectionTest.data.version}</p>
+                <p><strong>Environment:</strong> {connectionTest.data.environment}</p>
+                <p><strong>Services:</strong> {JSON.stringify(connectionTest.data.services)}</p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="mt-4 text-sm text-gray-500">
+          <p><strong>Backend URL:</strong> {API_CONFIG.BASE_URL || 'Tanımlı değil'}</p>
+          <p><strong>Environment Mode:</strong> {import.meta.env.MODE}</p>
         </div>
       </div>
 

@@ -9,6 +9,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Backend sadece login doğrulama için
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
+// Environment variables debug (admin-specific)
+console.log('🔧 API Service Debug:');
+console.log('Backend URL:', API_BASE_URL);
+console.log('Environment:', import.meta.env.MODE);
+
 // Get auth token - admin panel httpOnly cookies kullanır
 const getAuthToken = () => {
   // Admin panel httpOnly cookies kullanır, token gerekmez
@@ -89,8 +94,15 @@ export const api = {
     try {
       return await response.json();
     } catch (error) {
-      console.error('JSON Parse Error - Response might be HTML:', error);
-      throw new Error('Backend returned invalid response. Check if API is working correctly.');
+      console.error('❌ JSON Parse Hatası - Backend\'den HTML cevabı geldi:', error);
+      
+      // Railway environment variables kontrolü
+      if (!API_CONFIG.BASE_URL) {
+        throw new Error('❌ Backend URL bulunamadı! Railway dashboard\'dan VITE_API_URL environment variable\'ını ayarlayın.');
+      }
+      
+      // Backend erişim hatası
+      throw new Error(`❌ Backend API\'ye ulaşılamıyor (${API_CONFIG.BASE_URL}). Railway\'de backend service\'inin çalıştığını kontrol edin.`);
     }
   },
 
@@ -370,7 +382,38 @@ export const adminApi = {
   getRedisKeys: async (pattern) => adminApi.redis.getKeys(pattern),
   getRedisKey: async (keyName) => adminApi.redis.getKey(keyName),
   deleteRedisKey: async (keyName) => adminApi.redis.deleteKey(keyName),
-  flushRedis: async () => adminApi.redis.flush()
+  flushRedis: async () => adminApi.redis.flush(),
+
+  // ===== BACKEND CONNECTION TEST =====
+  testConnection: async () => {
+    try {
+      console.log('🔍 Backend bağlantı testi başlıyor...');
+      console.log('Test URL:', `${API_CONFIG.BASE_URL}/health`);
+      
+      const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Backend bağlantı başarılı:', data);
+      return { success: true, data };
+      
+    } catch (error) {
+      console.error('❌ Backend bağlantı hatası:', error);
+      return { success: false, error: error.message };
+    }
+  }
 };
 
 export default adminApi;
