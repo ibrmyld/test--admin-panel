@@ -14,7 +14,8 @@ import {
   Server,
   Wifi,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 

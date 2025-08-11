@@ -3,10 +3,12 @@ import ReactGA from 'react-ga4';
 // Google Analytics konfigürasyonu
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
 
-// GA Debug
-console.log('📊 Google Analytics Debug:');
-console.log('VITE_GA_MEASUREMENT_ID:', import.meta.env.VITE_GA_MEASUREMENT_ID);
-console.log('GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID);
+// GA Debug (sadece development modunda)
+if (import.meta.env.DEV) {
+  console.log('📊 Google Analytics Debug:');
+  console.log('VITE_GA_MEASUREMENT_ID:', import.meta.env.VITE_GA_MEASUREMENT_ID);
+  console.log('GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID);
+}
 
 export const initGA = () => {
   ReactGA.initialize(GA_MEASUREMENT_ID, {
