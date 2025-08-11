@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('admin_login_time')
           }
         } catch (error) {
-          // API erişilemiyorsa demo mode devam et
-          console.warn('Auth verify failed, using local session:', error)
+          // API erişilemiyorsa local session'ı temizle
+          console.error('❌ Auth verify hatası:', error)
           setUser(JSON.parse(userData))
           setIsAuthenticated(true)
         }
@@ -84,33 +84,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Login error:', error)
       
-      // Fallback demo credentials (development için)
-      const demoCredentials = {
-        'admin@raliux.com': 'admin123',
-        'test@admin.com': 'test123',
-        'ibrahim@raliux.com': 'ibrahim123'
-      }
-      
-      if (demoCredentials[email] && demoCredentials[email] === password) {
-        const userData = {
-          firstName: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-          email,
-          role: 'admin',
-          id: Math.random().toString(36).substr(2, 9),
-          loginTime: new Date().toISOString()
-        }
-        
-        localStorage.setItem('admin_user', JSON.stringify(userData))
-        localStorage.setItem('admin_login_time', Date.now().toString())
-        
-        setUser(userData)
-        setIsAuthenticated(true)
-        return { success: true, user: userData }
-      }
-      
       return { 
         success: false, 
-        error: error.message || 'Invalid credentials. Please check your email and password.' 
+        error: error.message || 'Backend API\'ye bağlanılamıyor. Railway\'de backend service\'inin çalıştığını kontrol edin.' 
       }
     } finally {
       setLoading(false)
