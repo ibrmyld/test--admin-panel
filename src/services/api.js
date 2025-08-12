@@ -2,8 +2,16 @@ import { API_CONFIG } from '../config/api';
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase direkt bağlantı - admin işlemler için
-const supabaseUrl = 'https://your-project-id.supabase.co';
-const supabaseAnonKey = 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-id.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+
+// Debug environment variables
+if (import.meta.env.DEV) {
+  console.log('🔧 Supabase Admin Debug:');
+  console.log('Supabase URL:', supabaseUrl);
+  console.log('Anon Key (first 20 chars):', supabaseAnonKey?.substring(0, 20) + '...');
+}
+
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Backend sadece login doğrulama için
@@ -34,6 +42,7 @@ export const apiRequest = async (endpoint, options = {}) => {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
+      'X-Admin-Panel': 'true',  // 🔒 Admin panel identifier
       ...options.headers,
     },
     credentials: 'include', // httpOnly cookies için gerekli
@@ -96,15 +105,15 @@ export const api = {
     try {
       return await response.json();
     } catch (error) {
-      console.error('❌ JSON Parse Hatası - Backend\'den HTML cevabı geldi:', error);
+      console.error('❌ JSON Parse Error - Backend returned HTML response:', error);
       
-      // Railway environment variables kontrolü
+      // Railway environment variables check
       if (!API_CONFIG.BASE_URL) {
-        throw new Error('❌ Backend URL bulunamadı! Railway dashboard\'dan VITE_API_URL environment variable\'ını ayarlayın.');
+        throw new Error('❌ Backend URL not found! Set VITE_API_URL environment variable in Railway dashboard.');
       }
       
-      // Backend erişim hatası
-      throw new Error(`❌ Backend API\'ye ulaşılamıyor (${API_CONFIG.BASE_URL}). Railway\'de backend service\'inin çalıştığını kontrol edin.`);
+      // Backend connection error
+      throw new Error(`❌ Cannot connect to Backend API (${API_CONFIG.BASE_URL}). Check if backend service is running on Railway.`);
     }
   },
 
