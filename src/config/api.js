@@ -15,14 +15,14 @@ if (import.meta.env.DEV) {
   console.log('All env vars:', import.meta.env);
 }
 
-// Railway environment variables kontrolü
+// Railway environment variables check
 if (!API_BASE_URL) {
-  console.error('❌ VITE_API_URL environment variable bulunamadı!');
-  console.error('Railway dashboard\'dan backend service URL\'sini VITE_API_URL olarak ekleyin');
-  console.error('Örnek: https://backend-service-name.up.railway.app');
+  console.error('❌ VITE_API_URL environment variable not found!');
+  console.error('Add backend service URL as VITE_API_URL in Railway dashboard');
+  console.error('Example: https://backend-service-name.up.railway.app');
 } else {
   if (import.meta.env.DEV) {
-    console.log('✅ Backend URL bulundu:', API_BASE_URL);
+    console.log('✅ Backend URL found:', API_BASE_URL);
   }
 }
 
