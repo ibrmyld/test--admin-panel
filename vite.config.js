@@ -30,7 +30,7 @@ export default defineConfig({
     port: 5173,
     host: true,
     strictPort: false,
-    open: true,
+    open: false, // Disable browser opening in container
     // Allow Railway (and other) hosts in dev if proxied
     allowedHosts: true
   },
