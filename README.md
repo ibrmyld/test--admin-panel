@@ -22,10 +22,10 @@ npm install
 `.env` dosyası oluştur:
 ```env
 # Backend API URL (Railway)
-VITE_API_URL=https://raliux-backend.up.railway.app
+VITE_API_URL=https://test-backend.up.railway.app
 
 # Admin Panel Config
-VITE_APP_NAME=Raliux Admin Panel
+VITE_APP_NAME=test Admin Panel
 ```
 
 ## 🛠 Development
@@ -51,7 +51,7 @@ Bu admin panel Railway'e deploy edilmek üzere hazırlanmıştır:
 ## 📚 Backend Bağlantısı
 
 Admin panel, Raliux Backend API'si ile çalışır:
-- **Backend URL**: `https://raliux-backend.up.railway.app`
+- **Backend URL**: `https://test-backend.up.railway.app`
 - **API Endpoints**: `/api/admin/*`
 - **Authentication**: JWT Bearer token
 
