@@ -1,4 +1,4 @@
-# Raliux Admin Panel
+# TEST Admin Panel
 
 Railway'e deploy edilmek üzere optimize edilmiş React admin paneli.
 
